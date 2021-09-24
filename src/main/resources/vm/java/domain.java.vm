@@ -1,0 +1,50 @@
+package ${packageName}.domain;
+
+#foreach ($import in $importList)
+import ${import};
+#end
+import lombok.Data;
+import org.nutz.dao.entity.annotation.Column;
+import org.nutz.dao.entity.annotation.Name;
+import org.nutz.dao.entity.annotation.Table;
+
+/**
+ * ${functionName}对象 ${tableName}
+ *
+ * @author ${author}
+ * @date ${datetime}
+ */
+#set($Entity="BaseEntity")
+@Data
+#if($table.dynamic)
+#set($MapTableName=${table.dynamicTableName})
+#else
+#set($MapTableName=${tableName})
+#end
+@Table("${MapTableName}")
+public class ${ClassName} extends ${Entity}
+{
+    private static final long serialVersionUID = 1L;
+
+#foreach ($column in $columns)
+#if($column.columnComment)
+    /** $column.columnComment */
+#end
+#if($column.list)
+#if($column.javaType == 'LocalDateTime')
+    @JsonFormat(pattern = "yyyy-MM-dd")
+#end
+#end
+#if($column.pk)
+    @Name
+#else
+    @Column
+#end
+    private $column.javaType $column.javaField;
+
+#end
+    public void ${className}NoPage()
+    {
+        super.setBaseEntityNull();
+    }
+}

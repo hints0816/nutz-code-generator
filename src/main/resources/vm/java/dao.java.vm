@@ -1,0 +1,67 @@
+package ${packageName}.dao;
+
+import org.nutz.dao.TableName;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+import org.nutz.dao.Dao;
+import org.nutz.dao.Cnd;
+import org.nutz.dao.pager.Pager;
+import java.util.List;
+import org.hints.nutz.domain.TablePageData;
+
+import ${packageName}.domain.${ClassName};
+
+/**
+ * ${functionName}对象 ${tableName}
+ *
+ * @author ${author}
+ * @date ${datetime}
+ */
+#set($tableParam="")
+#set($tableParamSet="")
+#set($tableParamClear="")
+#if($table.dynamic)
+    #set($tableParam="String param, ")
+    #set($tableParamSet="TableName.set(param);\r\n")
+    #set($tableParamClear="TableName.clear();\r\n")
+#end
+@Repository
+public class ${ClassName}Dao
+{
+    @Autowired
+    private Dao dao;
+
+    public ${ClassName} insert${ClassName}(${tableParam}${ClassName} ${className}){
+        ${tableParamSet}${ClassName} insert = dao.insert(${className});${tableParamClear}
+        return insert;
+    }
+
+    public int delete${ClassName}ById(${tableParam}${pkColumn.javaType} ${pkColumn.javaField}){
+        ${tableParamSet}int delete = dao.clear(${ClassName}.class, Cnd.where("${pkColumn.javaField}", "=", ${pkColumn.javaField}));${tableParamClear}
+        return delete;
+    }
+
+    public int delete${ClassName}ByIds(${tableParam}${pkColumn.javaType}[] ${pkColumn.javaField}s){
+        ${tableParamSet}int delete = dao.clear(${ClassName}.class, Cnd.where("${pkColumn.javaField}", "in", ${pkColumn.javaField}s));${tableParamClear}
+        return delete;
+    }
+
+    public int update${ClassName}(${tableParam}${ClassName} ${className}){
+        ${tableParamSet}int update = dao.update(${className});${tableParamClear}
+        return update;
+    }
+
+    public ${ClassName} select${ClassName}ById(${tableParam}${pkColumn.javaType} ${pkColumn.javaField}){
+        ${tableParamSet}${ClassName} fetch = dao.fetch(${ClassName}.class, ${pkColumn.javaField});${tableParamClear}
+        return fetch;
+    }
+
+    public TablePageData<${ClassName}> select${ClassName}List(${tableParam}${ClassName} ${className}){
+        Pager pager = dao.createPager(${className}.getPageNum(), ${className}.getPageSize());
+        ${className}.${className}NoPage();
+        Cnd cnd = Cnd.from(dao,${className});
+        ${tableParamSet}List<${ClassName}> query = dao.query(${ClassName}.class, cnd, pager);${tableParamClear}
+        TablePageData<${ClassName}> tablePageData = new TablePageData(query, pager);
+        return tablePageData;
+    }
+}

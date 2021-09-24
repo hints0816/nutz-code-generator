@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+    <title>Signin Template for Bootstrap</title>
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<script type="text/javascript" src="/js/jquery-1.12.4.min.js"></script>
+<script src="/bootstrap/js/bootstrap.min.js"></script>
+<script>
+    $(document).ready(function() {
+        doSearch();
+
+        $('.master-checkbox').on('click',function(){
+            $("input[class='slave-checkbox']").prop("checked", this.checked);
+        })
+
+        $(document).on("click",".preview",function () {
+            var $this = $(this)
+            var tableName = $this.attr("data-json")
+            $.ajax({
+                type:'GET',
+                url: "/generate/preview/"+tableName,
+                success: function(data) {
+                    $("#domain").html("<pre class='pre-scrollable'>"+data.data["vm/java/domain.java.vm"]+"</pre>");
+                    $("#dao").html("<pre class='pre-scrollable'>"+data.data["vm/java/dao.java.vm"]+"</pre>");
+                    $("#service").html("<pre class='pre-scrollable'>"+data.data["vm/java/service.java.vm"]+"</pre>");
+                    $("#serviceImpl").html("<pre class='pre-scrollable'>"+data.data["vm/java/serviceImpl.java.vm"]+"</pre>");
+                    $("#controller").html("<pre class='pre-scrollable'>"+data.data["vm/java/controller.java.vm"]+"</pre>");
+                },
+                error:function(data){
+                }
+            });
+        });
+
+        $(document).on("click",".download",function () {
+            var chk_value =[];
+            $('input[class="slave-checkbox"]:checked').each(function(){
+                chk_value.push($(this).val());
+            });
+            window.open('http://127.0.0.1:8084/generate/batchGenCode?tables='+chk_value.toString())
+        });
+    });
+
+    function doSearch() {
+        $.ajax({
+            type:'GET',
+            url: "/generate/list?pageNum=1&pageSize=20",
+            success: function(data) {
+                $.each(data.data.dataList, function(index,value) {
+                    $(".table").append(
+                        "<tbody>" +
+                        "<tr>" +
+                        "<td><input type=\"checkbox\" class=\"slave-checkbox\" value=\""+value.tableName+"\"></td>" +
+                        "<td>"+value.tableName+"</td>" +
+                        "<td>"+value.tableComment+"</td>" +
+                        "<td>"+value.createTime+"</td>" +
+                        "<td>"+value.updateTime+"</td>" +
+                        "<td>" +
+                        "<button data-json=\""+value.tableName+"\" type=\"button\" class=\"btn btn-primary btn-xs preview\" data-toggle=\"modal\" data-target=\"#myModal\">\n" +
+                        "preview code" +
+                        "</button>" +
+                        "<span class=\"glyphicon glyphicon-save\" aria-hidden=\"true\">" +
+                        "</td>" +
+                        "</tr>" +
+                        "</tbody>");
+                })
+            },
+            error:function(data){
+            }
+        });
+    }
+</script>
+<body>
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+            </div>
+            <div class="modal-body">
+                <ul class="nav nav-tabs" role="tablist">
+                    <li role="presentation" class="active"><a href="#domain" aria-controls="domain" role="tab" data-toggle="tab">domain</a></li>
+                    <li role="presentation"><a href="#dao" aria-controls="dao" role="tab" data-toggle="tab">dao</a></li>
+                    <li role="presentation"><a href="#service" aria-controls="service" role="tab" data-toggle="tab">service</a></li>
+                    <li role="presentation"><a href="#serviceImpl" aria-controls="serviceImpl" role="tab" data-toggle="tab">serviceImpl</a></li>
+                    <li role="presentation"><a href="#controller" aria-controls="controller" role="tab" data-toggle="tab">controller</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane active" id="domain"></div>
+                    <div role="tabpanel" class="tab-pane" id="dao"></div>
+                    <div role="tabpanel" class="tab-pane" id="service"></div>
+                    <div role="tabpanel" class="tab-pane" id="serviceImpl"></div>
+                    <div role="tabpanel" class="tab-pane" id="controller"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div class="container">
+    <nav class="navbar navbar-default">
+    </nav>
+    <input style="width: 400px; float: left" type="text" class="form-control" placeholder="Username" aria-describedby="basic-addon1">
+    <button type="button" class="btn btn-primary search"> search </button>
+    <table class="table">
+        <thead>
+        <tr>
+            <th><input type="checkbox" class="master-checkbox"></th>
+            <th>tableName</th>
+            <th>tableComment</th>
+            <th>createTime</th>
+            <th>updateTime</th>
+            <th>operate</th>
+        </tr>
+        </thead>
+    </table>
+    <button type="button" class="btn btn-primary download"> download </button>
+</div>
+</body>
+</html>

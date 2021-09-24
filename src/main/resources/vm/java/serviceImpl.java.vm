@@ -1,0 +1,73 @@
+package ${packageName}.service.impl;
+
+import java.util.List;
+#foreach ($column in $columns)
+#if($column.javaField == 'createTime' || $column.javaField == 'updateTime')
+import com.ruoyi.common.utils.DateUtils;
+#break
+#end
+#end
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+#if($table.sub)
+import java.util.ArrayList;
+import ${packageName}.domain.${subClassName};
+#end
+import org.hints.nutz.domain.TablePageData;
+import ${packageName}.dao.${ClassName}Dao;
+import ${packageName}.domain.${ClassName};
+import ${packageName}.service.${ClassName}Service;
+
+/**
+ * ${functionName}Service业务层处理
+ * 
+ * @author ${author}
+ * @date ${datetime}
+ */
+#set($tableParam='')
+#if($table.dynamic)
+    #set($tableParam='"'+${table.defaultParam}+'", ')
+#end
+@Service
+public class ${ClassName}ServiceImpl implements ${ClassName}Service
+{
+    @Autowired
+    private ${ClassName}Dao ${className}Dao;
+
+    @Override
+    public ${ClassName} select${ClassName}ById(${pkColumn.javaType} ${pkColumn.javaField})
+    {
+        return ${className}Dao.select${ClassName}ById(${tableParam}${pkColumn.javaField});
+    }
+
+    @Override
+    public TablePageData<${ClassName}> select${ClassName}List(${ClassName} ${className})
+    {
+        return ${className}Dao.select${ClassName}List(${tableParam}${className});
+    }
+
+    @Override
+    public int insert${ClassName}(${ClassName} ${className})
+    {
+        ${ClassName} insert = ${className}Dao.insert${ClassName}(${tableParam}${className});
+        return insert != null?1:0;
+    }
+
+    @Override
+    public int update${ClassName}(${ClassName} ${className})
+    {
+        return ${className}Dao.update${ClassName}(${tableParam}${className});
+    }
+
+    @Override
+    public int delete${ClassName}ByIds(${pkColumn.javaType}[] ${pkColumn.javaField}s)
+    {
+        return ${className}Dao.delete${ClassName}ByIds(${tableParam}${pkColumn.javaField}s);
+    }
+
+    @Override
+    public int delete${ClassName}ById(${pkColumn.javaType} ${pkColumn.javaField})
+    {
+        return ${className}Dao.delete${ClassName}ById(${tableParam}${pkColumn.javaField});
+    }
+}
