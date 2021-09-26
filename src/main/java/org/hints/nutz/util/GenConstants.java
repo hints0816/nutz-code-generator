@@ -32,17 +32,20 @@ public class GenConstants
     public static final String PARENT_MENU_NAME = "parentMenuName";
 
     /** 数据库字符串类型 */
-    public static final String[] COLUMNTYPE_STR = { "char", "varchar", "nvarchar", "varchar2" };
+    public static final String[] COLUMNTYPE_STR = { "char", "varchar", "nvarchar", "varchar2", "nvarchar2" };
 
     /** 数据库文本类型 */
-    public static final String[] COLUMNTYPE_TEXT = { "tinytext", "text", "mediumtext", "longtext" };
+    public static final String[] COLUMNTYPE_TEXT = { "tinytext", "text", "mediumtext", "longtext", "long" };
 
     /** 数据库时间类型 */
     public static final String[] COLUMNTYPE_TIME = { "datetime", "time", "date", "timestamp" };
 
     /** 数据库数字类型 */
     public static final String[] COLUMNTYPE_NUMBER = { "tinyint", "smallint", "mediumint", "int", "number", "integer",
-            "bit", "bigint", "float", "double", "decimal" };
+            "bit", "bigint", "float", "double", "decimal", "binary_double", "binary_float" };
+
+    /** 数据库数字类型 */
+    public static final String[] COLUMNTYPE_OBJECT = { "blob", "clob" };
 
     /** 页面不需要编辑字段 */
     public static final String[] COLUMNNAME_NOT_EDIT = { "id", "create_by", "create_time", "del_flag" };
@@ -96,6 +99,9 @@ public class GenConstants
 
     /** 长整型 */
     public static final String TYPE_LONG = "Long";
+
+    /** 长整型 */
+    public static final String TYPE_OBJECT = "Object";
 
     /** 浮点型 */
     public static final String TYPE_DOUBLE = "Double";

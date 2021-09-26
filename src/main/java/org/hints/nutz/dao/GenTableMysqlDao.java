@@ -34,6 +34,7 @@ public class GenTableMysqlDao {
         Pager pager = dao.createPager(genTable.getPageNum(), genTable.getPageSize());
         genTable.genTableNoPage();
         sql.setCondition(cnd);
+        sql.setPager(pager);
         sql.setCallback(Sqls.callback.entities());
         sql.setEntity(dao.getEntity(GenTable.class));
         List<GenTable> query = dao.execute(sql).getList(GenTable.class);

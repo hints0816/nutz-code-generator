@@ -10,16 +10,24 @@ import ${packageName}.domain.${ClassName};
  * @author ${author}
  * @date ${datetime}
  */
-
+#set($Param="")
+#if($table.comPkColumn.size() >= 2)
+#foreach ($comPkColumn in $table.comPkColumn)
+#set($Param=$Param+"${comPkColumn.javaType} ${comPkColumn.javaField}"+", ")
+#end
+#set($Param=$Param.substring(0,$Param.lastIndexOf(',')))
+#else
+#set($Param="${pkColumn.javaType} ${pkColumn.javaField}")
+#end
 public interface ${ClassName}Service
 {
     /**
      * 查询${functionName}
-     * 
+     *
      * @param ${pkColumn.javaField} ${functionName}ID
      * @return ${functionName}
      */
-    ${ClassName} select${ClassName}ById(${pkColumn.javaType} ${pkColumn.javaField});
+    ${ClassName} select${ClassName}ById(${Param});
 
     /**
      * 查询${functionName}列表
@@ -59,5 +67,5 @@ public interface ${ClassName}Service
      * @param ${pkColumn.javaField} ${functionName}ID
      * @return 结果
      */
-    int delete${ClassName}ById(${pkColumn.javaType} ${pkColumn.javaField});
+    int delete${ClassName}ById(${Param});
 }

@@ -6,6 +6,7 @@ import ${import};
 import lombok.Data;
 import org.nutz.dao.entity.annotation.Column;
 import org.nutz.dao.entity.annotation.Name;
+import org.nutz.dao.entity.annotation.PK;
 import org.nutz.dao.entity.annotation.Table;
 
 /**
@@ -15,13 +16,23 @@ import org.nutz.dao.entity.annotation.Table;
  * @date ${datetime}
  */
 #set($Entity="BaseEntity")
+#set($Pk="")
 @Data
 #if($table.dynamic)
 #set($MapTableName=${table.dynamicTableName})
 #else
 #set($MapTableName=${tableName})
 #end
+#if($table.comPkColumn.size() >= 2)
+#set($Pk="@PK({")
+#foreach ($column in $table.comPkColumn)
+#set($Pk=$Pk+'"'+$column.columnName+'",')
+#end
+#set($Pk=$Pk.substring(0,$Pk.lastIndexOf(',')))
+#set($Pk=$Pk+"})")
+#end
 @Table("${MapTableName}")
+${Pk}
 public class ${ClassName} extends ${Entity}
 {
     private static final long serialVersionUID = 1L;
@@ -36,7 +47,11 @@ public class ${ClassName} extends ${Entity}
 #end
 #end
 #if($column.pk)
+#if($pkColumn.isPk == "2")
+    @Column
+#else
     @Name
+#end
 #else
     @Column
 #end

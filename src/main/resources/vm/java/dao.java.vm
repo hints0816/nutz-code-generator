@@ -1,6 +1,8 @@
 package ${packageName}.dao;
 
+#if($table.dynamic)
 import org.nutz.dao.TableName;
+#end
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.nutz.dao.Dao;
@@ -21,9 +23,25 @@ import ${packageName}.domain.${ClassName};
 #set($tableParamSet="")
 #set($tableParamClear="")
 #if($table.dynamic)
-    #set($tableParam="String param, ")
-    #set($tableParamSet="TableName.set(param);\r\n")
-    #set($tableParamClear="TableName.clear();\r\n")
+#set($tableParam="String param, ")
+#set($tableParamSet="TableName.set(param);\r\n")
+#set($tableParamClear="TableName.clear();\r\n")
+#end
+#set($Param="")
+#set($ParamCnd="Cnd.where")
+#set($ParamCndDel="")
+#if($table.comPkColumn.size() >= 2)
+#foreach ($comPkColumn in $table.comPkColumn)
+#set($Param=$Param+"${comPkColumn.javaType} ${comPkColumn.javaField}"+", ")
+#set($ParamCnd=$ParamCnd+'("'+"${comPkColumn.javaField}"+'", "=", '+"${comPkColumn.javaField}"+").and")
+#end
+#set($Param=$Param.substring(0,$Param.lastIndexOf(',')))
+#set($ParamCnd=$ParamCnd.substring(0,$ParamCnd.lastIndexOf('.and')))
+#set($ParamCndDel=$ParamCnd)
+#else
+#set($Param="${pkColumn.javaType} ${pkColumn.javaField}")
+#set($ParamCnd="${pkColumn.javaField}")
+#set($ParamCndDel='Cnd.where("'+"${comPkColumn.javaField}"+'", "=", '+"${comPkColumn.javaField}"+")")
 #end
 @Repository
 public class ${ClassName}Dao
@@ -36,8 +54,8 @@ public class ${ClassName}Dao
         return insert;
     }
 
-    public int delete${ClassName}ById(${tableParam}${pkColumn.javaType} ${pkColumn.javaField}){
-        ${tableParamSet}int delete = dao.clear(${ClassName}.class, Cnd.where("${pkColumn.javaField}", "=", ${pkColumn.javaField}));${tableParamClear}
+    public int delete${ClassName}ById(${tableParam}${Param}){
+        ${tableParamSet}int delete = dao.clear(${ClassName}.class, ${ParamCndDel});${tableParamClear}
         return delete;
     }
 
@@ -51,8 +69,8 @@ public class ${ClassName}Dao
         return update;
     }
 
-    public ${ClassName} select${ClassName}ById(${tableParam}${pkColumn.javaType} ${pkColumn.javaField}){
-        ${tableParamSet}${ClassName} fetch = dao.fetch(${ClassName}.class, ${pkColumn.javaField});${tableParamClear}
+    public ${ClassName} select${ClassName}ById(${tableParam}${Param}){
+        ${tableParamSet}${ClassName} fetch = dao.fetch(${ClassName}.class, ${ParamCnd});${tableParamClear}
         return fetch;
     }
 

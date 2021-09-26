@@ -2,10 +2,13 @@ package org.hints.nutz.dao;
 
 import org.hints.nutz.domain.GenTable;
 import org.hints.nutz.domain.GenTableColumn;
+import org.hints.nutz.domain.TablePageData;
+import org.hints.nutz.util.StringUtils;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
 import org.nutz.dao.Sqls;
 import org.nutz.dao.entity.Record;
+import org.nutz.dao.pager.Pager;
 import org.nutz.dao.sql.Sql;
 import org.nutz.dao.util.cri.Static;
 import org.springframework.stereotype.Repository;
@@ -23,14 +26,27 @@ public class GenTableOracleDao {
     @Resource
     private Dao dao;
 
-    public List<GenTable> selectGenTableList(String tableName){
+    public TablePageData<GenTable> selectGenTableList(GenTable genTable){
         Sql sql = Sqls.create("select table_name as tableName, comments as tableComment, created as createTime, last_ddl_time as updateTime " +
-                "from user_tab_comments t1,user_objects t2 where t1.table_name = t2.object_name and t1.table_name = upper(@tableName)");
-        sql.setParam("tableName", tableName);
+                "from user_tab_comments t1,user_objects t2 $condition");
+        Sql sql2 = Sqls.create("select count(*) as count from user_tab_comments t1,user_objects t2 $condition");
+        Cnd cnd = Cnd.where(new Static("t1.table_name = t2.object_name"));
+        if (StringUtils.isNotEmpty(genTable.getTableName())) {
+            cnd.and(new Static("t1.table_name like upper('%"+genTable.getTableName()+"%')"));
+        }
+        sql2.setCondition(cnd);
+        sql2.setCallback(Sqls.callback.integer());
+        int TotalCount=dao.execute(sql2).getInt();
+        Pager pager = dao.createPager(genTable.getPageNum(), genTable.getPageSize());
+        pager.setRecordCount(TotalCount);
+        genTable.genTableNoPage();
+        sql.setCondition(cnd);
+        sql.setPager(pager);
         sql.setCallback(Sqls.callback.entities());
         sql.setEntity(dao.getEntity(GenTable.class));
-        List<GenTable> list = dao.execute(sql).getList(GenTable.class);
-        return list;
+        List<GenTable> query = dao.execute(sql).getList(GenTable.class);
+        TablePageData<GenTable> tablePageData = new TablePageData(query, pager);
+        return tablePageData;
     }
 
     public List<GenTable> selectDbTableListByNames(String[] tableNames){
@@ -45,12 +61,11 @@ public class GenTableOracleDao {
         return list;
     }
 
-
     public List<GenTableColumn> selectDbTableColumnsByName(String tableName){
         Sql sql = Sqls.create("select a.column_name as columnName," +
                 " case" +
-                " when nullable = 'N' and" +
-                " a.column_name =" +
+                " when nullable = 'N' or" +
+                " a.column_name in " +
                 " (select a.column_name" +
                 " from user_cons_columns a, user_constraints b" +
                 " where a.constraint_name = b.constraint_name" +
@@ -61,7 +76,7 @@ public class GenTableOracleDao {
                 " null" +
                 " end as isRequired," +
                 " case" +
-                " when a.column_name =" +
+                " when a.column_name in " +
                 " (select a.column_name" +
                 " from user_cons_columns a, user_constraints b" +
                 " where a.constraint_name = b.constraint_name" +

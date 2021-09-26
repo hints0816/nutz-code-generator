@@ -3,7 +3,6 @@ package ${packageName}.service.impl;
 import java.util.List;
 #foreach ($column in $columns)
 #if($column.javaField == 'createTime' || $column.javaField == 'updateTime')
-import com.ruoyi.common.utils.DateUtils;
 #break
 #end
 #end
@@ -28,6 +27,19 @@ import ${packageName}.service.${ClassName}Service;
 #if($table.dynamic)
     #set($tableParam='"'+${table.defaultParam}+'", ')
 #end
+#set($Param="")
+#set($ParamCnd="")
+#if($table.comPkColumn.size() >= 2)
+#foreach ($comPkColumn in $table.comPkColumn)
+#set($Param=$Param+"${comPkColumn.javaType} ${comPkColumn.javaField}"+", ")
+#set($ParamCnd=$ParamCnd+"${comPkColumn.javaField}"+",")
+#end
+#set($Param=$Param.substring(0,$Param.lastIndexOf(',')))
+#set($ParamCnd=$ParamCnd.substring(0,$ParamCnd.lastIndexOf(',')))
+#else
+#set($Param="${pkColumn.javaType} ${pkColumn.javaField}")
+#set($ParamCnd="${pkColumn.javaField}")
+#end
 @Service
 public class ${ClassName}ServiceImpl implements ${ClassName}Service
 {
@@ -35,9 +47,9 @@ public class ${ClassName}ServiceImpl implements ${ClassName}Service
     private ${ClassName}Dao ${className}Dao;
 
     @Override
-    public ${ClassName} select${ClassName}ById(${pkColumn.javaType} ${pkColumn.javaField})
+    public ${ClassName} select${ClassName}ById(${Param})
     {
-        return ${className}Dao.select${ClassName}ById(${tableParam}${pkColumn.javaField});
+        return ${className}Dao.select${ClassName}ById(${tableParam}${ParamCnd});
     }
 
     @Override
@@ -66,8 +78,8 @@ public class ${ClassName}ServiceImpl implements ${ClassName}Service
     }
 
     @Override
-    public int delete${ClassName}ById(${pkColumn.javaType} ${pkColumn.javaField})
+    public int delete${ClassName}ById(${Param})
     {
-        return ${className}Dao.delete${ClassName}ById(${tableParam}${pkColumn.javaField});
+        return ${className}Dao.delete${ClassName}ById(${ParamCnd});
     }
 }

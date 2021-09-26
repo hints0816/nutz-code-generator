@@ -76,6 +76,11 @@ public class GenUtils
                 column.setJavaType(GenConstants.TYPE_LONG);
             }
         }
+        else if (arraysContains(GenConstants.COLUMNTYPE_OBJECT, dataType))
+        {
+            column.setHtmlType(GenConstants.HTML_INPUT);
+            column.setJavaType(GenConstants.TYPE_OBJECT);
+        }
 
         // 插入字段（默认所有字段都需要插入）
         column.setIsInsert(GenConstants.REQUIRE);

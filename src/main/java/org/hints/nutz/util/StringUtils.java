@@ -399,7 +399,7 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils
         else if (!name.contains("_"))
         {
             // 不含下划线，仅将首字母大写
-            return name.substring(0, 1).toUpperCase() + name.substring(1);
+            return name.substring(0, 1).toUpperCase() + name.toLowerCase().substring(1);
         }
         // 用下划线将原始字符串分割
         String[] camels = name.split("_");

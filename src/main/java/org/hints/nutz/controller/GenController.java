@@ -31,6 +31,10 @@ public class GenController {
     @Autowired
     private GenTableOracleDao genTableOracleDao;
 
+    /**
+     * 代码生成器首页
+     * @return
+     */
     @GetMapping
     public ModelAndView index(){
         ModelAndView view = new ModelAndView();
@@ -38,6 +42,11 @@ public class GenController {
         return view;
     }
 
+    /**
+     * 查询
+     * @param genTable
+     * @return
+     */
     @GetMapping("/list")
     public ReturnVo dataList(GenTable genTable)
     {
@@ -45,19 +54,34 @@ public class GenController {
         return ReturnVo.success(genTableTablePageData);
     }
 
+    /**
+     * 生成代码(自定义路径)
+     * @param genTableParam
+     */
     @PostMapping("/importTable")
     public void importTableSave(@RequestBody GenTable genTableParam)
     {
        genTableService.generatorCode(genTableParam);
     }
 
+    /**
+     * 生成代码(预览代码)
+     * @param tableName
+     * @return
+     */
     @GetMapping("/preview/{tableName}")
-    public ReturnVo preview(@PathVariable("tableName") String tableName) throws IOException
+    public ReturnVo preview(@PathVariable("tableName") String tableName)
     {
         Map<String, String> dataMap = genTableService.previewCode(tableName);
         return ReturnVo.success(dataMap);
     }
 
+    /**
+     * 生成代码(下载代码)
+     * @param response
+     * @param tableName
+     * @throws IOException
+     */
     @GetMapping("/download/{tableName}")
     public void download(HttpServletResponse response,  @PathVariable("tableName") String tableName) throws IOException
     {
@@ -67,6 +91,9 @@ public class GenController {
 
     /**
      * 批量生成代码
+     * @param response
+     * @param tables
+     * @throws IOException
      */
     @GetMapping("/batchGenCode")
     public void batchGenCode(HttpServletResponse response, String tables) throws IOException
@@ -84,7 +111,7 @@ public class GenController {
         response.reset();
         response.addHeader("Access-Control-Allow-Origin", "*");
         response.addHeader("Access-Control-Expose-Headers", "Content-Disposition");
-        response.setHeader("Content-Disposition", "attachment; filename=\"ruoyi.zip\"");
+        response.setHeader("Content-Disposition", "attachment; filename=\"nutzcode-generate.zip\"");
         response.addHeader("Content-Length", "" + data.length);
         response.setContentType("application/octet-stream; charset=UTF-8");
         IOUtils.write(data, response.getOutputStream());

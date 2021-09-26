@@ -22,6 +22,22 @@ import ${packageName}.service.${ClassName}Service;
  * @author ${author}
  * @date ${datetime}
  */
+#set($Param="")
+#set($urlValue="")
+#set($ParamCnd="")
+#if($table.comPkColumn.size() >= 2)
+#foreach ($comPkColumn in $table.comPkColumn)
+#set($Param=$Param+'@PathVariable("'+"${comPkColumn.javaField}"+'") '+"${comPkColumn.javaType} ${comPkColumn.javaField}"+", ")
+#set($urlValue=$urlValue+"/{"+"${comPkColumn.javaField}"+"}")
+#set($ParamCnd=$ParamCnd+"${comPkColumn.javaField}"+",")
+#end
+#set($Param=$Param.substring(0,$Param.lastIndexOf(',')))
+#set($ParamCnd=$ParamCnd.substring(0,$ParamCnd.lastIndexOf(',')))
+#else
+#set($urlValue="/{"+"${pkColumn.javaField}"+"}")
+#set($Param='@PathVariable("'+"${pkColumn.javaField}"+'") '+"${pkColumn.javaType} ${pkColumn.javaField}")
+#set($ParamCnd="${pkColumn.javaField}")
+#end
 @RestController
 @RequestMapping("/${moduleName}/${businessName}")
 public class ${ClassName}Controller
@@ -42,8 +58,8 @@ public class ${ClassName}Controller
     /**
      * 获取${functionName}详细信息
      */
-    @GetMapping(value = "/{${pkColumn.javaField}}")
-    public ReturnVo getInfo(@PathVariable("${pkColumn.javaField}") ${pkColumn.javaType} ${pkColumn.javaField})
+    @GetMapping(value = "${urlValue}")
+    public ReturnVo getInfo(${Param})
     {
         return ReturnVo.success(${className}Service.select${ClassName}ById(${pkColumn.javaField}));
     }

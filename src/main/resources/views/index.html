@@ -12,12 +12,32 @@
 </head>
 <script type="text/javascript" src="/js/jquery-1.12.4.min.js"></script>
 <script src="/bootstrap/js/bootstrap.min.js"></script>
+<script src="/bootstrap/js/bootstrap-paginator.min.js"></script>
 <script>
+    let currentPage = 1;
+    let pageSize = 10;
     $(document).ready(function() {
         doSearch();
 
         $('.master-checkbox').on('click',function(){
             $("input[class='slave-checkbox']").prop("checked", this.checked);
+        })
+
+        $('.isDynamic').on('click',function(){
+            if($('input[class="isDynamic"]').prop("checked"))
+            {
+                $(".Dynamic").html("" +
+                    "<div class=\"form-group\">\n" +
+                    "            <label for=\"dynamicTableName\">dynamicTableName</label>\n" +
+                    "            <input type=\"password\" class=\"form-control\" id=\"dynamicTableName\" placeholder=\"Password\">\n" +
+                    "            </div>\n" +
+                    "            <div class=\"form-group\">\n" +
+                    "            <label for=\"defaultParam\">defaultParam</label>\n" +
+                    "            <input type=\"password\" class=\"form-control\" id=\"defaultParam\" placeholder=\"Password\">\n" +
+                    "            </div>");
+            }
+            else
+                $(".Dynamic").html("");
         })
 
         $(document).on("click",".preview",function () {
@@ -45,36 +65,77 @@
             });
             window.open('http://127.0.0.1:8084/generate/batchGenCode?tables='+chk_value.toString())
         });
+
+        $(document).on("click",".Previous",function() {
+            pageNum--;
+            doSearch();
+        });
+
+        $(document).on("click",".Next",function() {
+            pageNum++;
+            doSearch();
+        });
+
+        $(".search").on("click",function() {
+            doSearch();
+        });
+
+
+        function setPage(pageCurrent, pageSum, callback) {
+            $(".pagination").bootstrapPaginator({
+                //设置版本号
+                bootstrapMajorVersion: 3,
+                // 显示第几页
+                currentPage: pageCurrent,
+                // 总页数
+                totalPages: pageSum,
+                //当单击操作按钮的时候, 执行该函数, 调用ajax渲染页面
+                onPageClicked: function (event,originalEvent,type,page) {
+                    currentPage = page
+                    callback && callback()
+                }
+            })
+        }
+
+
+
+        function doSearch() {
+            $.ajax({
+                type:'GET',
+                url: "/generate/list",
+                data: {
+                    "tableName": $(".tableName").val(),
+                    "pageNum": currentPage,
+                    "pageSize": pageSize
+                },
+                success: function(data) {
+                    $(".table tbody").empty()
+                    $.each(data.data.dataList, function(index,value) {
+                        $(".table tbody").append(
+                            "<tr>" +
+                            "<td><input type=\"checkbox\" class=\"slave-checkbox\" value=\""+value.tableName+"\"></td>" +
+                            "<td>"+value.tableName+"</td>" +
+                            "<td>"+value.tableComment+"</td>" +
+                            "<td>"+value.createTime+"</td>" +
+                            "<td>"+value.updateTime+"</td>" +
+                            "<td>" +
+                            "<button data-json=\""+value.tableName+"\" type=\"button\" class=\"btn btn-primary btn-xs preview\" data-toggle=\"modal\" data-target=\"#myModal\">\n" +
+                            "preview code" +
+                            "</button>    " +
+                            "    <button data-json=\""+value.tableName+"\" type=\"button\" class=\"btn btn-primary btn-xs custom\" data-toggle=\"modal\" data-target=\"#myCustom\">\n" +
+                            "custom" +
+                            "</button>" +
+                            "</td>" +
+                            "</tr>");
+                    })
+                    setPage(data.data.pager.pageNumber, data.data.pager.pageCount, doSearch);
+                },
+                error:function(data){
+                }
+            });
+        }
     });
 
-    function doSearch() {
-        $.ajax({
-            type:'GET',
-            url: "/generate/list?pageNum=1&pageSize=20",
-            success: function(data) {
-                $.each(data.data.dataList, function(index,value) {
-                    $(".table").append(
-                        "<tbody>" +
-                        "<tr>" +
-                        "<td><input type=\"checkbox\" class=\"slave-checkbox\" value=\""+value.tableName+"\"></td>" +
-                        "<td>"+value.tableName+"</td>" +
-                        "<td>"+value.tableComment+"</td>" +
-                        "<td>"+value.createTime+"</td>" +
-                        "<td>"+value.updateTime+"</td>" +
-                        "<td>" +
-                        "<button data-json=\""+value.tableName+"\" type=\"button\" class=\"btn btn-primary btn-xs preview\" data-toggle=\"modal\" data-target=\"#myModal\">\n" +
-                        "preview code" +
-                        "</button>" +
-                        "<span class=\"glyphicon glyphicon-save\" aria-hidden=\"true\">" +
-                        "</td>" +
-                        "</tr>" +
-                        "</tbody>");
-                })
-            },
-            error:function(data){
-            }
-        });
-    }
 </script>
 <body>
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -82,7 +143,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+                <h4 class="modal-title" id="myModalLabel">preview code</h4>
             </div>
             <div class="modal-body">
                 <ul class="nav nav-tabs" role="tablist">
@@ -104,10 +165,40 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="myCustom" tabindex="-1" role="dialog" aria-labelledby="myCustomLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myCustomLabel">custom</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="className">className</label>
+                        <input type="email" class="form-control" id="className" placeholder="Email">
+                    </div>
+                    <div class="form-group">
+                        <label for="genPath">genPath</label>
+                        <input type="password" class="form-control" id="genPath" placeholder="Password">
+                    </div>
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" class="isDynamic"> isDynamic
+                        </label>
+                    </div>
+                    <div class="Dynamic">
+                    </div>
+                    <button type="submit" class="btn btn-primary">download</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="container">
     <nav class="navbar navbar-default">
     </nav>
-    <input style="width: 400px; float: left" type="text" class="form-control" placeholder="Username" aria-describedby="basic-addon1">
+    <input style="width: 400px; float: left" type="text" class="form-control tableName" placeholder="tableName" aria-describedby="basic-addon1">
     <button type="button" class="btn btn-primary search"> search </button>
     <table class="table">
         <thead>
@@ -120,7 +211,16 @@
             <th>operate</th>
         </tr>
         </thead>
+        <tbody>
+        </tbody>
     </table>
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+
+
+        </ul>
+    </nav>
+
     <button type="button" class="btn btn-primary download"> download </button>
 </div>
 </body>

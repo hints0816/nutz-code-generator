@@ -64,6 +64,9 @@ public class GenTable extends BaseEntity
     /** 主键信息 */
     private GenTableColumn pkColumn;
 
+    /** 复合主键信息 */
+    private List<GenTableColumn> comPkColumn;
+
     /** 表列信息 */
     @Valid
     private List<GenTableColumn> columns;
