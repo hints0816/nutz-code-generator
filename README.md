@@ -1,4 +1,4 @@
-# Nutz-Code-Generate
+# Nutz-Code-Generator
 #### 介绍
 本项目是基于NutzDao的代码生成器
 
