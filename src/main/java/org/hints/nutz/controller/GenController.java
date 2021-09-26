@@ -90,6 +90,15 @@ public class GenController {
     }
 
     /**
+     */
+    @GetMapping("/download")
+    public void download(HttpServletResponse response, GenTable genTableParam) throws IOException
+    {
+        byte[] data = genTableService.downloadCode(genTableParam);
+        genCode(response, data);
+    }
+
+    /**
      * 批量生成代码
      * @param response
      * @param tables

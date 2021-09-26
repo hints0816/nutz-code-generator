@@ -18,6 +18,7 @@
     let pageSize = 10;
     $(document).ready(function() {
         doSearch();
+        $('#myCustom').modal("hide");
 
         $('.master-checkbox').on('click',function(){
             $("input[class='slave-checkbox']").prop("checked", this.checked);
@@ -29,11 +30,11 @@
                 $(".Dynamic").html("" +
                     "<div class=\"form-group\">\n" +
                     "            <label for=\"dynamicTableName\">dynamicTableName</label>\n" +
-                    "            <input type=\"password\" class=\"form-control\" id=\"dynamicTableName\" placeholder=\"Password\">\n" +
+                    "            <input type=\"text\" class=\"form-control\" id=\"dynamicTableName\" placeholder=\"Password\">\n" +
                     "            </div>\n" +
                     "            <div class=\"form-group\">\n" +
                     "            <label for=\"defaultParam\">defaultParam</label>\n" +
-                    "            <input type=\"password\" class=\"form-control\" id=\"defaultParam\" placeholder=\"Password\">\n" +
+                    "            <input type=\"text\" class=\"form-control\" id=\"defaultParam\" placeholder=\"Password\">\n" +
                     "            </div>");
             }
             else
@@ -63,7 +64,7 @@
             $('input[class="slave-checkbox"]:checked').each(function(){
                 chk_value.push($(this).val());
             });
-            window.open('http://127.0.0.1:8084/generate/batchGenCode?tables='+chk_value.toString())
+            window.open('/generate/batchGenCode?tables='+encodeURIComponent(chk_value.toString()))
         });
 
         $(document).on("click",".Previous",function() {
@@ -80,6 +81,26 @@
             doSearch();
         });
 
+        $(document).on("click",".custom",function () {
+            var $this = $(this)
+            var tableName = $this.attr("data-json")
+            $("#hideTableName").val(tableName)
+        });
+
+        $(document).on("click",".customDownload",function() {
+            var url = 'tableName='+ encodeURIComponent($("#hideTableName").val())
+                    +'&className='+ encodeURIComponent($("#className").val())
+                    +'&genPath=' + encodeURIComponent($("#genPath").val())
+                    +'&functionAuthor='+ encodeURIComponent($("#functionAuthor").val())
+                    +'&functionName=' + encodeURIComponent($("#functionName").val())
+                    +'&packageName='+ encodeURIComponent($("#packageName").val());
+            if($('input[class="isDynamic"]').prop("checked"))
+            {
+                url+='&isDynamic=1&dynamicTableName=' + encodeURIComponent($("#dynamicTableName").val())
+                   +'&defaultParam='+ encodeURIComponent($("#defaultParam").val());
+            }
+            window.open('/generate/download?'+url)
+        });
 
         function setPage(pageCurrent, pageSum, callback) {
             $(".pagination").bootstrapPaginator({
@@ -96,8 +117,6 @@
                 }
             })
         }
-
-
 
         function doSearch() {
             $.ajax({
@@ -172,15 +191,28 @@
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title" id="myCustomLabel">custom</h4>
             </div>
+            <input type="hidden" id="hideTableName" value="">
             <div class="modal-body">
                 <form>
                     <div class="form-group">
+                        <label for="functionName">functionName</label>
+                        <input type="text" class="form-control" id="functionName" placeholder="functionName">
+                    </div>
+                    <div class="form-group">
+                        <label for="functionAuthor">functionAuthor</label>
+                        <input type="text" class="form-control" id="functionAuthor" placeholder="functionAuthor">
+                    </div>
+                    <div class="form-group">
+                        <label for="packageName">packageName</label>
+                        <input type="text" class="form-control" id="packageName" placeholder="packageName">
+                    </div>
+                    <div class="form-group">
                         <label for="className">className</label>
-                        <input type="email" class="form-control" id="className" placeholder="Email">
+                        <input type="text" class="form-control" id="className" placeholder="className">
                     </div>
                     <div class="form-group">
                         <label for="genPath">genPath</label>
-                        <input type="password" class="form-control" id="genPath" placeholder="Password">
+                        <input type="text" class="form-control" id="genPath" placeholder="genPath">
                     </div>
                     <div class="checkbox">
                         <label>
@@ -189,7 +221,7 @@
                     </div>
                     <div class="Dynamic">
                     </div>
-                    <button type="submit" class="btn btn-primary">download</button>
+                    <button type="submit" class="btn btn-primary customDownload">download</button>
                 </form>
             </div>
         </div>
@@ -197,6 +229,7 @@
 </div>
 <div class="container">
     <nav class="navbar navbar-default">
+        <h3>  NUTZ 代碼生成器  </h3>
     </nav>
     <input style="width: 400px; float: left" type="text" class="form-control tableName" placeholder="tableName" aria-describedby="basic-addon1">
     <button type="button" class="btn btn-primary search"> search </button>

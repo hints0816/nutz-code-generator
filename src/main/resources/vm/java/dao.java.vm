@@ -41,7 +41,7 @@ import ${packageName}.domain.${ClassName};
 #else
 #set($Param="${pkColumn.javaType} ${pkColumn.javaField}")
 #set($ParamCnd="${pkColumn.javaField}")
-#set($ParamCndDel='Cnd.where("'+"${comPkColumn.javaField}"+'", "=", '+"${comPkColumn.javaField}"+")")
+#set($ParamCndDel='Cnd.where("'+"${pkColumn.javaField}"+'", "=", '+"${pkColumn.javaField}"+")")
 #end
 @Repository
 public class ${ClassName}Dao

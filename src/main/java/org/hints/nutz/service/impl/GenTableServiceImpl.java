@@ -31,7 +31,7 @@ import java.util.zip.ZipOutputStream;
 public class GenTableServiceImpl implements GenTableService {
 
     @Autowired
-    private GenTableOracleDao genTableOracleDao;
+    private GenTableMysqlDao genTableOracleDao;
 
     @Override
     public TablePageData<GenTable> selectGenTableList(GenTable genTable) {
@@ -41,6 +41,24 @@ public class GenTableServiceImpl implements GenTableService {
     @Override
     public List<GenTable> selectDbTableListByNames(String[] tableNames) {
         return genTableOracleDao.selectDbTableListByNames(tableNames);
+    }
+
+    public void setTable(GenTable table) {
+        GenUtils.initTable(table, GenConfig.getAuthor());
+        List<GenTableColumn> genTableColumns = genTableOracleDao.selectDbTableColumnsByName(table.getTableName());
+        ArrayList<GenTableColumn> comPkColumn = new ArrayList<>();
+        for (GenTableColumn column : genTableColumns) {
+            if (column.isPk()) {
+                comPkColumn.add(column);
+            }
+            GenUtils.initColumnField(column, table);
+        }
+        table.setComPkColumn(comPkColumn);
+        table.setColumns(genTableColumns);
+        setPkColumn(table);
+        if (table.getComPkColumn().size() >= 2) {
+            table.getPkColumn().setIsPk("2");
+        }
     }
 
     /**
@@ -53,27 +71,9 @@ public class GenTableServiceImpl implements GenTableService {
         String[] tableNames = {tableName};
         List<GenTable> genTables = genTableOracleDao.selectDbTableListByNames(tableNames);
         GenTable table = genTables.get(0);
-        GenUtils.initTable(table, GenConfig.getAuthor());
-        List<GenTableColumn> genTableColumns = genTableOracleDao.selectDbTableColumnsByName(table.getTableName());
-
-        ArrayList<GenTableColumn> comPkColumn = new ArrayList<>();
-        for (GenTableColumn column : genTableColumns) {
-            if (column.isPk()) {
-                comPkColumn.add(column);
-            }
-            GenUtils.initColumnField(column, table);
-        }
-        table.setComPkColumn(comPkColumn);
-        table.setColumns(genTableColumns);
-        setPkColumn(table);
-
-        if (table.getComPkColumn().size() >= 2) {
-            table.getPkColumn().setIsPk("2");
-        }
+        setTable(table);
         VelocityInitializer.initVelocity();
-
         VelocityContext context = VelocityUtils.prepareContext(table);
-
         // 获取模板列表
         List<String> templates = VelocityUtils.getTemplateList(table.getTplCategory());
         for (String template : templates)
@@ -91,32 +91,16 @@ public class GenTableServiceImpl implements GenTableService {
     public void generatorCode(GenTable genTableParam) {
         String table = genTableParam.getTableName();
         String[] tableNames = Convert.toStrArray(table);
-        List<GenTable> tableList = genTableOracleDao.selectDbTableListByNames(tableNames);;
+        List<GenTable> tableList = genTableOracleDao.selectDbTableListByNames(tableNames);
         for (GenTable genTable : tableList){
             genTable.setGenPath(genTableParam.getGenPath());
-            genTable.setFunctionName(genTableParam.getFunctionName());
             genTable.setClassName(genTableParam.getClassName());
             genTable.setFunctionName(genTableParam.getFunctionName());
             genTable.setIsDynamic(genTableParam.getIsDynamic());
             genTable.setDynamicTableName(genTableParam.getDynamicTableName());
             genTable.setDefaultParam(genTableParam.getDefaultParam());
 
-            GenUtils.initTable(genTable, GenConfig.getAuthor());
-            List<GenTableColumn> genTableColumns = genTableOracleDao.selectDbTableColumnsByName(genTable.getTableName());
-            ArrayList<GenTableColumn> comPkColumn = new ArrayList<>();
-            for (GenTableColumn column : genTableColumns) {
-                if (column.isPk()) {
-                    comPkColumn.add(column);
-                }
-                GenUtils.initColumnField(column, genTable);
-            }
-            genTable.setComPkColumn(comPkColumn);
-            genTable.setColumns(genTableColumns);
-            setPkColumn(genTable);
-
-            if (genTable.getComPkColumn().size() >= 2) {
-                genTable.getPkColumn().setIsPk("2");
-            }
+            setTable(genTable);
             VelocityInitializer.initVelocity();
             VelocityContext velocityContext = VelocityUtils.prepareContext(genTable);
 
@@ -164,32 +148,60 @@ public class GenTableServiceImpl implements GenTableService {
         return outputStream.toByteArray();
     }
 
-    /**
-     * 查询表信息并生成代码
-     */
+    @Override
+    public byte[] downloadCode(GenTable genTable)
+    {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        ZipOutputStream zip = new ZipOutputStream(outputStream);
+        generatorCode(genTable, zip);
+        IOUtils.closeQuietly(zip);
+        return outputStream.toByteArray();
+    }
+
+    private void generatorCode(GenTable genTableParam, ZipOutputStream zip)
+    {
+        String table = genTableParam.getTableName();
+        String[] tableNames = Convert.toStrArray(table);
+        List<GenTable> tableList = genTableOracleDao.selectDbTableListByNames(tableNames);
+        GenTable genTable = tableList.get(0);
+        genTable.setGenPath(genTableParam.getGenPath());
+        genTable.setClassName(genTableParam.getClassName());
+        genTable.setFunctionName(genTableParam.getFunctionName());
+        genTable.setIsDynamic(genTableParam.getIsDynamic());
+        genTable.setDynamicTableName(genTableParam.getDynamicTableName());
+        genTable.setDefaultParam(genTableParam.getDefaultParam());
+        genTable.setFunctionAuthor(genTableParam.getFunctionAuthor());
+        genTable.setPackageName(genTableParam.getPackageName());
+        setTable(genTable);
+        VelocityInitializer.initVelocity();
+        VelocityContext context = VelocityUtils.prepareContext(genTable);
+        List<String> templates = VelocityUtils.getTemplateList(genTable.getTplCategory());
+        for (String template : templates)
+        {
+            StringWriter sw = new StringWriter();
+            Template tpl = Velocity.getTemplate(template, Constants.UTF8);
+            tpl.merge(context, sw);
+            try
+            {
+                zip.putNextEntry(new ZipEntry(VelocityUtils.getFileName(template, genTable)));
+                IOUtils.write(sw.toString(), zip, Constants.UTF8);
+                IOUtils.closeQuietly(sw);
+                zip.flush();
+                zip.closeEntry();
+            }
+            catch (IOException e)
+            {
+                new RuntimeException("渲染模板失败");
+            }
+        }
+    }
+
     private void generatorCode(String tableName, ZipOutputStream zip)
     {
-        // 查询表信息
         String[] tableNames = {tableName};
         List<GenTable> genTables = genTableOracleDao.selectDbTableListByNames(tableNames);
         GenTable table = genTables.get(0);
-        GenUtils.initTable(table, GenConfig.getAuthor());
-        List<GenTableColumn> genTableColumns = genTableOracleDao.selectDbTableColumnsByName(table.getTableName());
-        ArrayList<GenTableColumn> comPkColumn = new ArrayList<>();
-        for (GenTableColumn column : genTableColumns) {
-            if (column.isPk()) {
-                comPkColumn.add(column);
-            }
-            GenUtils.initColumnField(column, table);
-        }
-        table.setComPkColumn(comPkColumn);
-        table.setColumns(genTableColumns);
-        setPkColumn(table);
-
-        if (table.getComPkColumn().size() >= 2) {
-            table.getPkColumn().setIsPk("2");
-        }
-
+        setTable(table);
         VelocityInitializer.initVelocity();
         VelocityContext context = VelocityUtils.prepareContext(table);
         // 获取模板列表

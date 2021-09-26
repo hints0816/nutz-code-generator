@@ -18,13 +18,13 @@ public class GenUtils
      */
     public static void initTable(GenTable genTable, String operName)
     {
-        genTable.setGenPath(genTable.getGenPath()==null?"/":genTable.getGenPath());
-        genTable.setClassName(genTable.getClassName()==null?convertClassName(genTable.getTableName()):genTable.getClassName());
-        genTable.setPackageName(GenConfig.getPackageName());
+        genTable.setGenPath(StringUtils.isEmpty(genTable.getGenPath())?"/":genTable.getGenPath());
+        genTable.setClassName(StringUtils.isEmpty(genTable.getClassName())?convertClassName(genTable.getTableName()):genTable.getClassName());
+        genTable.setPackageName(StringUtils.isEmpty(genTable.getPackageName())?GenConfig.getPackageName():genTable.getPackageName());
         genTable.setModuleName(getModuleName(GenConfig.getPackageName()));
         genTable.setBusinessName(getBusinessName(genTable.getTableName()));
-        genTable.setFunctionName(genTable.getFunctionName()==null?replaceText(genTable.getTableComment()):genTable.getFunctionName());
-        genTable.setFunctionAuthor(GenConfig.getAuthor());
+        genTable.setFunctionName(StringUtils.isEmpty(genTable.getFunctionName())?replaceText(genTable.getTableComment()):genTable.getFunctionName());
+        genTable.setFunctionAuthor(StringUtils.isEmpty(genTable.getFunctionAuthor())?GenConfig.getAuthor():genTable.getFunctionAuthor());
         genTable.setCreateBy(operName);
     }
 

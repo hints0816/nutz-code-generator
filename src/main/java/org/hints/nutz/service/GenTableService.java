@@ -23,4 +23,6 @@ public interface GenTableService {
     byte[] downloadCode(String tableName);
 
     byte[] downloadCode(String[] tableNames);
+
+    byte[] downloadCode(GenTable genTable);
 }
