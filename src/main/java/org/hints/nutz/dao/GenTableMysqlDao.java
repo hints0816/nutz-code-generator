@@ -3,6 +3,7 @@ package org.hints.nutz.dao;
 import org.hints.nutz.domain.GenTable;
 import org.hints.nutz.domain.GenTableColumn;
 import org.hints.nutz.domain.TablePageData;
+import org.hints.nutz.util.StringUtils;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.Dao;
 import org.nutz.dao.Sqls;
@@ -27,11 +28,16 @@ public class GenTableMysqlDao {
     public TablePageData<GenTable> selectGenTableList(GenTable genTable){
         Sql sql = Sqls.create("select table_name as tableName, table_comment as tableComment, create_time as createTime, update_time as updateTime " +
                 " from information_schema.tables $condition");
+        Sql sql2 = Sqls.create("select count(*) as count from information_schema.tables $condition");
         Cnd cnd = Cnd.where(new Static("table_schema = (select database())"));
-        if (genTable.getTableName() != null) {
-            cnd.and(new Static("lower(table_name) = lower('"+genTable.getTableName()+"')"));
+        if (StringUtils.isNotEmpty(genTable.getTableName())) {
+            cnd.and(new Static("lower(table_name) like lower('%"+genTable.getTableName()+"%')"));
         }
+        sql2.setCondition(cnd);
+        sql2.setCallback(Sqls.callback.integer());
+        int TotalCount=dao.execute(sql2).getInt();
         Pager pager = dao.createPager(genTable.getPageNum(), genTable.getPageSize());
+        pager.setRecordCount(TotalCount);
         genTable.genTableNoPage();
         sql.setCondition(cnd);
         sql.setPager(pager);
