@@ -1,8 +1,8 @@
 package ${packageName}.service;
 
 import java.util.List;
-import org.hints.nutz.domain.TablePageData;
-import ${packageName}.domain.${ClassName};
+import com.gree.nutz.entity.TablePageData;
+import ${packageName}.entity.${ClassName};
 
 /**
  * ${functionName}Service接口

@@ -10,11 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 #if($table.sub)
 import java.util.ArrayList;
-import ${packageName}.domain.${subClassName};
+import ${packageName}.entity.${subClassName};
 #end
-import org.hints.nutz.domain.TablePageData;
+import com.gree.common.entity.TablePageData;
 import ${packageName}.dao.${ClassName}Dao;
-import ${packageName}.domain.${ClassName};
+import ${packageName}.entity.${ClassName};
 import ${packageName}.service.${ClassName}Service;
 
 /**
@@ -80,6 +80,6 @@ public class ${ClassName}ServiceImpl implements ${ClassName}Service
     @Override
     public int delete${ClassName}ById(${Param})
     {
-        return ${className}Dao.delete${ClassName}ById(${ParamCnd});
+        return ${className}Dao.delete${ClassName}ById(${tableParam}${ParamCnd});
     }
 }

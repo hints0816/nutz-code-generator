@@ -29,11 +29,11 @@
             {
                 $(".Dynamic").html("" +
                     "<div class=\"form-group\">\n" +
-                    "            <label for=\"dynamicTableName\">dynamicTableName</label>\n" +
+                    "            <label for=\"dynamicTableName\">dynamicTableName (例：SMBSE01${comp})</label>\n" +
                     "            <input type=\"text\" class=\"form-control\" id=\"dynamicTableName\" placeholder=\"Password\">\n" +
                     "            </div>\n" +
                     "            <div class=\"form-group\">\n" +
-                    "            <label for=\"defaultParam\">defaultParam</label>\n" +
+                    "            <label for=\"defaultParam\">defaultParam (例：400)</label>\n" +
                     "            <input type=\"text\" class=\"form-control\" id=\"defaultParam\" placeholder=\"Password\">\n" +
                     "            </div>");
             }
@@ -48,7 +48,7 @@
                 type:'GET',
                 url: "/generate/preview/"+tableName,
                 success: function(data) {
-                    $("#domain").html("<pre class='pre-scrollable'>"+data.data["vm/java/domain.java.vm"]+"</pre>");
+                    $("#entity").html("<pre class='pre-scrollable'>"+data.data["vm/java/entity.java.vm"]+"</pre>");
                     $("#dao").html("<pre class='pre-scrollable'>"+data.data["vm/java/dao.java.vm"]+"</pre>");
                     $("#service").html("<pre class='pre-scrollable'>"+data.data["vm/java/service.java.vm"]+"</pre>");
                     $("#serviceImpl").html("<pre class='pre-scrollable'>"+data.data["vm/java/serviceImpl.java.vm"]+"</pre>");
@@ -166,14 +166,14 @@
             </div>
             <div class="modal-body">
                 <ul class="nav nav-tabs" role="tablist">
-                    <li role="presentation" class="active"><a href="#domain" aria-controls="domain" role="tab" data-toggle="tab">domain</a></li>
+                    <li role="presentation" class="active"><a href="#entity" aria-controls="entity" role="tab" data-toggle="tab">entity</a></li>
                     <li role="presentation"><a href="#dao" aria-controls="dao" role="tab" data-toggle="tab">dao</a></li>
                     <li role="presentation"><a href="#service" aria-controls="service" role="tab" data-toggle="tab">service</a></li>
                     <li role="presentation"><a href="#serviceImpl" aria-controls="serviceImpl" role="tab" data-toggle="tab">serviceImpl</a></li>
                     <li role="presentation"><a href="#controller" aria-controls="controller" role="tab" data-toggle="tab">controller</a></li>
                 </ul>
                 <div class="tab-content">
-                    <div role="tabpanel" class="tab-pane active" id="domain"></div>
+                    <div role="tabpanel" class="tab-pane active" id="entity"></div>
                     <div role="tabpanel" class="tab-pane" id="dao"></div>
                     <div role="tabpanel" class="tab-pane" id="service"></div>
                     <div role="tabpanel" class="tab-pane" id="serviceImpl"></div>

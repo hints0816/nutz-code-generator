@@ -9,9 +9,9 @@ import org.nutz.dao.Dao;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.pager.Pager;
 import java.util.List;
-import org.hints.nutz.domain.TablePageData;
+import com.gree.common.entity.TablePageData;
 
-import ${packageName}.domain.${ClassName};
+import ${packageName}.entity.${ClassName};
 
 /**
  * ${functionName}对象 ${tableName}
@@ -24,8 +24,10 @@ import ${packageName}.domain.${ClassName};
 #set($tableParamClear="")
 #if($table.dynamic)
 #set($tableParam="String param, ")
-#set($tableParamSet="TableName.set(param);\r\n")
-#set($tableParamClear="TableName.clear();\r\n")
+#set($tableParamSet="TableName.set(param);
+        ")
+#set($tableParamClear="
+        TableName.clear();")
 #end
 #set($Param="")
 #set($ParamCnd="Cnd.where")
