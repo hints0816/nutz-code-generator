@@ -8,6 +8,8 @@ import org.nutz.dao.entity.annotation.Column;
 import org.nutz.dao.entity.annotation.Name;
 import org.nutz.dao.entity.annotation.PK;
 import org.nutz.dao.entity.annotation.Table;
+import com.gree.common.entity.BaseEntity;
+
 
 /**
  * ${functionName}对象 ${tableName}

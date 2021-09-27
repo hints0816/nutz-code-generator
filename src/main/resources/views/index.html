@@ -68,12 +68,12 @@
         });
 
         $(document).on("click",".Previous",function() {
-            pageNum--;
+            currentPage--;
             doSearch();
         });
 
         $(document).on("click",".Next",function() {
-            pageNum++;
+            currentPage++;
             doSearch();
         });
 
@@ -147,7 +147,7 @@
                             "</td>" +
                             "</tr>");
                     })
-                    setPage(data.data.pager.pageNumber, data.data.pager.pageCount, doSearch);
+                    // setPage(data.data.pager.pageNumber, data.data.pager.pageCount, doSearch);
                 },
                 error:function(data){
                 }
@@ -247,13 +247,19 @@
         <tbody>
         </tbody>
     </table>
+    <nav aria-label="age navigation">
+        <ul class="pager">
+            <li><a class="Previous" href="#">Previous</a></li>
+            <li><a class="Next" href="#">Next</a></li>
+        </ul>
+    </nav>
+    <!--
     <nav aria-label="Page navigation">
         <ul class="pagination">
 
 
         </ul>
-    </nav>
-
+    </nav>-->
     <button type="button" class="btn btn-primary download"> download </button>
 </div>
 </body>

@@ -27,17 +27,18 @@ public class GenTableOracleDao {
 
     public TablePageData<GenTable> selectGenTableList(GenTable genTable){
         Sql sql = Sqls.create("select table_name as tableName, comments as tableComment, created as createTime, last_ddl_time as updateTime " +
-                "from user_tab_comments t1,user_objects t2 $condition");
-        Sql sql2 = Sqls.create("select count(*) as count from user_tab_comments t1,user_objects t2 $condition");
+                "from all_tab_comments t1,all_objects t2 $condition");
+//        Sql sql2 = Sqls.create("select count(*) as count from all_tab_comments t1,all_objects t2 $condition");
         Cnd cnd = Cnd.where(new Static("t1.table_name = t2.object_name"));
+        cnd.and(new Static("t1.owner = t2.owner"));
         if (StringUtils.isNotEmpty(genTable.getTableName())) {
             cnd.and(new Static("t1.table_name like upper('%"+genTable.getTableName()+"%')"));
         }
-        sql2.setCondition(cnd);
-        sql2.setCallback(Sqls.callback.integer());
-        int TotalCount=dao.execute(sql2).getInt();
+//        sql2.setCondition(cnd);
+//        sql2.setCallback(Sqls.callback.integer());
+//        int TotalCount=dao.execute(sql2).getInt();
         Pager pager = dao.createPager(genTable.getPageNum(), genTable.getPageSize());
-        pager.setRecordCount(TotalCount);
+//        pager.setRecordCount(TotalCount);
         genTable.genTableNoPage();
         sql.setCondition(cnd);
         sql.setPager(pager);
@@ -50,9 +51,10 @@ public class GenTableOracleDao {
 
     public List<GenTable> selectDbTableListByNames(String[] tableNames){
         Sql sql = Sqls.create("select table_name as tableName, comments as tableComment, created as createTime, last_ddl_time as updateTime " +
-                "from user_tab_comments t1,user_objects t2 $condition");
+                "from all_tab_comments t1,all_objects t2 $condition");
         Cnd cnd = Cnd.where("t1.table_name", "in", tableNames)
-            .and(new Static("t1.table_name = t2.object_name"));
+            .and(new Static("t1.table_name = t2.object_name"))
+            .and(new Static("t1.owner = t2.owner"));
         sql.setCondition(cnd);
         sql.setCallback(Sqls.callback.entities());
         sql.setEntity(dao.getEntity(GenTable.class));
@@ -66,8 +68,10 @@ public class GenTableOracleDao {
                 " when nullable = 'N' or" +
                 " a.column_name in " +
                 " (select a.column_name" +
-                " from user_cons_columns a, user_constraints b" +
+                " from all_cons_columns a, all_constraints b" +
                 " where a.constraint_name = b.constraint_name" +
+                " AND a.owner = b.owner" +
+                " AND a.table_name = b.table_name" +
                 " and b.constraint_type = 'P'" +
                 " and a.table_name = upper(@table_name)) then" +
                 " '1'" +
@@ -77,8 +81,10 @@ public class GenTableOracleDao {
                 " case" +
                 " when a.column_name in " +
                 " (select a.column_name" +
-                " from user_cons_columns a, user_constraints b" +
+                " from all_cons_columns a, all_constraints b" +
                 " where a.constraint_name = b.constraint_name" +
+                " AND a.owner = b.owner" +
+                " AND a.table_name = b.table_name" +
                 " and b.constraint_type = 'P'" +
                 " and a.table_name = upper(@table_name)) then" +
                 " '1'" +
@@ -88,8 +94,9 @@ public class GenTableOracleDao {
                 " b.comments as columnComment," +
                 " a.column_id as sort," +
                 " a.data_type as columnType" +
-                " from user_tab_columns a, user_col_comments b" +
+                " from all_tab_columns a, all_col_comments b" +
                 " where a.table_name = b.table_name " +
+                " AND a.owner = b.owner" +
                 " and a.column_name = b.column_name " +
                 " and a.table_name = upper(@table_name)" +
                 " order by a.column_id");
